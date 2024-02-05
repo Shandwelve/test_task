@@ -63,6 +63,7 @@ if __name__ == "__main__":
     o2.add_link(m)
     o2.add_link(k)
     o2.add_link(c)
+    c.add_link(k)
 
     graph = WordGraph([p1, p2, o1, c, n, r, o2, k, m])
     pprint(graph.find_words())
