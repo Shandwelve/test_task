@@ -25,7 +25,7 @@ def check_grid(
     clue: list[int],
     paralel_clue: list[int],
 ) -> bool:
-    for i in range(len(options[0])):
+    for i in range(GRID_SIZE):
         column = tuple(options[j][i] for j in range(GRID_SIZE))
         if not check_row(column, clue[i]) or not check_row(
             column[::-1], paralel_clue[::-1][i]
