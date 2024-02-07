@@ -1,5 +1,9 @@
-from itertools import permutations
+from itertools import permutations, product
 from pprint import pprint
+
+GRID_SIZE = 4
+TOTAL_CLUES = GRID_SIZE**2
+BUILDING_TYPES = [1, 2, 3, 4]
 
 
 def check_row(row: tuple[int, ...], clue: int) -> bool:
@@ -17,15 +21,12 @@ def check_row(row: tuple[int, ...], clue: int) -> bool:
 
 
 def check_grid(
-    option_row_1: tuple[int, ...],
-    option_row_2: tuple[int, ...],
-    option_row_3: tuple[int, ...],
-    option_row_4: tuple[int, ...],
+    options: tuple[tuple[int, ...]],
     clue: list[int],
     paralel_clue: list[int],
 ) -> bool:
-    for i in range(len(option_row_1)):
-        column = (option_row_1[i], option_row_2[i], option_row_3[i], option_row_4[i])
+    for i in range(len(options[0])):
+        column = tuple(options[j][i] for j in range(GRID_SIZE))
         if not check_row(column, clue[i]) or not check_row(
             column[::-1], paralel_clue[::-1][i]
         ):
@@ -34,10 +35,9 @@ def check_grid(
 
 
 def generate_options(clue: int, paralel_clue: int) -> list[tuple[int, ...]]:
-    building_types = [1, 2, 3, 4]
     valid_options = []
 
-    for option in permutations(building_types):
+    for option in permutations(BUILDING_TYPES):
         if check_row(option, clue) and check_row(option[::-1], paralel_clue):
             valid_options.append(option)
 
@@ -45,24 +45,19 @@ def generate_options(clue: int, paralel_clue: int) -> list[tuple[int, ...]]:
 
 
 def solve_puzzle(clues: list[int]) -> list[tuple[int, ...]] | None:
-    total_options = [generate_options(clues[15 - i], clues[i + 4]) for i in range(0, 4)]
+    total_options = [
+        generate_options(clues[TOTAL_CLUES - i - 1], clues[GRID_SIZE + i])
+        for i in range(0, GRID_SIZE)
+    ]
     valid_solutions = []
 
-    for option_row_1 in total_options[0]:
-        for option_row_2 in total_options[1]:
-            for option_row_3 in total_options[2]:
-                for option_row_4 in total_options[3]:
-                    if check_grid(
-                        option_row_1,
-                        option_row_2,
-                        option_row_3,
-                        option_row_4,
-                        clues[:4],
-                        clues[8:12],
-                    ):
-                        valid_solutions.append(
-                            [option_row_1, option_row_2, option_row_3, option_row_4]
-                        )
+    for option_rows in product(*total_options):
+        if check_grid(
+            option_rows,
+            clues[:GRID_SIZE],
+            clues[GRID_SIZE * 2: GRID_SIZE * 3],
+        ):
+            valid_solutions.append(option_rows)
 
     if valid_solutions:
         return valid_solutions[0]
